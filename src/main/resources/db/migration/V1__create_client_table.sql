@@ -1,4 +1,4 @@
-CREATE TABLE "user" (
+CREATE TABLE client (
    id varchar(255) not null,
    name varchar(25) not null,
    email varchar(25) not null,
