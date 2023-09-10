@@ -1,45 +1,29 @@
 package com.netosantos.springsecurity.controller.auth
 
-import com.netosantos.springsecurity.controller.auth.dto.LoginDto
-import com.netosantos.springsecurity.controller.auth.dto.RegisterDto
-import com.netosantos.springsecurity.security.TokenService
-import org.apache.coyote.Response
-import org.springframework.http.ResponseEntity
+import com.netosantos.springsecurity.controller.auth.dto.AuthRequestDto
+import com.netosantos.springsecurity.security.JwtService
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.userdetails.User
-import org.springframework.security.crypto.bcrypt.BCrypt
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-
 @RestController
-@RequestMapping("/auth")
-class AuthController(
-        private val authenticationManager: AuthenticationManager,
-        private val tokenService: TokenService,
-        private val bCrypt: BCrypt
-) {
+@RequestMapping("auth")
+class AuthController(val manager: AuthenticationManager,val jwtService: JwtService) {
 
-    @GetMapping("/login")
-    fun login(@RequestBody @Validated loginDto: LoginDto): ResponseEntity<Any> {
-        val manager = UsernamePasswordAuthenticationToken(loginDto.user, loginDto.password)
+    @PostMapping()
+    fun getHello(@RequestBody body: AuthRequestDto): String {
 
-        val token = tokenService.createToken(manager.principal as String)
-        authenticationManager.authenticate(manager);
+        val authentication = UsernamePasswordAuthenticationToken(body.user, body.password)
+        manager.authenticate(authentication)
 
-        return ResponseEntity.ofNullable(token);
+        println("isAuthenticated?? ${authentication.isAuthenticated}")
+
+        val jwtToken = jwtService.createToken(authentication.name)
+
+        return jwtToken
     }
-
-//
-//    @PostMapping("/register")
-//    fun register(@RequestBody @Validated registerDto:RegisterDto):ResponseEntity<Any>{
-//    //Conectar no banco e criar tabela de User
-//    //Fazer o bean do UserDetailService
-//    //Realizar encode do password, e salvar no banco.
-//    }
 }
